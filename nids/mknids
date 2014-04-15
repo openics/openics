@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#if [ "$(id -u)" != "0" ]; then
+#   echo "This script must be run as root" 1>&2
+#   exit 1
+#fi
+
+if [[ -d libnids-1.24 ]]; then
+	rm -rf libnids-1.24
+fi
+
+tar -xozf libnids-1.24.tar.gz
+cd libnids-1.24
+patch --forward -p1 <src/libnids-track-established.patch 2>/dev/null >/dev/null
+autoconf
+./configure --prefix=`pwd` --enable-tcpreasm --disable-libglib --disable-libnet 2>/dev/null >/dev/null
+make install 2>/dev/null >/dev/null
+
+cp include/* ..
+cp lib/* ..
+
+cd ..
+rm -rf libnids-1.24
+
+echo
+echo libnids built successfully
+echo
+

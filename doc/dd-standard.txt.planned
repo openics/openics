@@ -1,0 +1,109 @@
+#
+# Standard Stack Data Dictionary Items
+#
+link.type:								ethernet
+link.protocol:							0x0800 (or ip4)
+link.vlan:								1.2
+internet.protocol:						0x06 (or tcp)		
+transport.protocol:						modbus
+app.rq									1
+app.rs									0
+
+
+origin|target.link.mac:					'00aabbcceeff'
+origin|target.internet.network:			131.219.5/24
+origin|target.internet.address:			131.219.5.33
+
+origin|target.geo.countrycode:			'US'
+origin|target.geo.countrycode3:			'???'
+origin|target.geo.countryname:			'United States'
+origin|target.geo.regioncode|statecode:	'UT','ut'
+origin|target.geo.regionname|statename:	'Utah'
+origin|target.geo.city:					'Salt Lake City'
+origin|target.geo.postalcode:			84116-85000
+origin|target.geo.location:				[40.8194,-111.9463]:20.0
+origin|target.geo.isp:					/^PacifiCorp/i
+origin|target.geo.company:				/^PacifiCorp/i
+origin|target.geo.metrocode:			770
+origin|target.geo.areacode:				801
+origin|target.geo.continentcode:		?
+origin|target.geo.confidence:			1
+origin|target.geo.accuracy:				33.3
+
+math.pi
+math.e
+
+#
+# Math Functions
+#
+abs(v)
+acos(v)
+asin(v)
+atan(v)
+ceil(v)
+cos(v)
+cot(v)
+deg(v)
+exp(v)
+floor(v)
+log(v, b)
+pow(v, p)
+rad(v)
+rand(s)
+round(v, d)
+sign(v)
+sin(v)
+sqrt(v)
+tan(v)
+
+#
+# Network Functions
+#
+innet(ip, cidr)
+ip2a(ip)
+a2ip(a)
+ip2host(ip)
+host2ip(host)
+mac2vendor(mac)
+
+#
+# Date Functions
+#
+date(YYYYMMDDhhmmss, islocal)
+dformat(v, format)
+now(islocal)
+e2d(epoch)
+d2e(date)
+dmath(date, value, unit)
+dofw(date)
+
+#
+# Crypto Functions
+#
+md5(v)
+sha(v, bits)
+aesen(v, password)
+aesde(v, password)
+
+#
+# Rollup/Anomaly Aggregators
+#
+cnt
+avg
+med
+max
+min
+sdp
+sds
+sum
+vrp
+vrs
+
+#
+# Directives
+#
+calendar:	Mo,Tu,We:9-17;Th,Fr:10-22 nwd us-holidays,euro-holidays
+predicate:  transport.protocol == modbus && app.rq && origin.geo.countrycode == CH
+rate:		10/s
+rollup:		med,sdp,cnt/5m log
+anomaly:	cnt < (med - 2 * sdp) || cnt > (med + 2 * sdp) 

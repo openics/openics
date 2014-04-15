@@ -1,0 +1,16 @@
+Immediate:
+
+- Add constants to data dictionary documentation
+- Support more protocol features via data dictionary elements
+- Produce man pages
+- Cross compile to other UNIX flavors, i.e. BSD and SUN
+- Obtain additional ICS packet captures for testing
+- Catalogue scenarios for various ICS vulnerabilities
+- Implement data keyword for opaque payload searches (snort style)
+- By popular demand: add comments to the code #@$!
+- Revisit libics internal logging wiring
+
+Ongoing:
+
+- Continue to add support for more ICS protocols
+- Continually enhance code base through performance optimization

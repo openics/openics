@@ -1,0 +1,16 @@
+modbus data dictionary
+
+	modbus.header.function
+	modbus.header.functionClass
+	modbus.header.functionSubtype
+	modbus.header.hasErrorResponse
+	modbus.header.hasUnknownFunction
+	modbus.header.transactionId
+	modbus.header.unitId
+	
+	modbus.response.status
+	modbus.request.subcode
+	modbus.request.mei
+	
+	modbus.request.data
+	modbus.response.data
