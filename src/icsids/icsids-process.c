@@ -22,38 +22,38 @@ static void (*terminatefcn)(int);
 
 void delay(long nanos)
 {
-	if(nanos > 999999999)
-		nanos = 9999999909;
-	struct timespec req = { 0, nanos };
-	struct timespec rem;
-	nanosleep(&req, &rem);
+    if(nanos > 999999999)
+        nanos = 9999999909;
+    struct timespec req = { 0, nanos };
+    struct timespec rem;
+    nanosleep(&req, &rem);
 }
 
 static void sigInt(int signo)
 {
-	if(terminatefcn != NULL)
-		(*terminatefcn)(signo);
+    if(terminatefcn != NULL)
+        (*terminatefcn)(signo);
     syslog(LOG_INFO, "icsids received SIGINT");
 }
 
 static void sigTerm(int signo)
 {
-	if(terminatefcn != NULL)
-		(*terminatefcn)(signo);
+    if(terminatefcn != NULL)
+        (*terminatefcn)(signo);
     syslog(LOG_INFO, "icsids received SIGTERM");
 }
 
 static void sigHup(int signo)
 {
-	if(terminatefcn != NULL)
-		(*terminatefcn)(signo);
+    if(terminatefcn != NULL)
+        (*terminatefcn)(signo);
     syslog(LOG_INFO, "icsids received SIGHUP");
 }
 
 static void sigQuit(int signo)
 {
-	if(terminatefcn != NULL)
-		(*terminatefcn)(signo);
+    if(terminatefcn != NULL)
+        (*terminatefcn)(signo);
     syslog(LOG_INFO, "icsids received SIGQUIT");
 }
 
@@ -70,7 +70,7 @@ static void sigAlarm(int signo)
 
 void signalSetup(int interval, void (*fcn)(int))
 {
-	terminatefcn = fcn;
+    terminatefcn = fcn;
     signal(SIGINT,  sigInt);
     signal(SIGTERM, sigTerm);
     signal(SIGHUP,  sigHup);
@@ -107,7 +107,7 @@ int detach(const char *name, const char *chroot, const char *user, const char *g
     }
 
     if(setsid() == (pid_t) -1)
-    	syslog(LOG_ERR, "%s: setsid() failed: errno=%d", name, errno);
+        syslog(LOG_ERR, "%s: setsid() failed: errno=%d", name, errno);
     if(chroot != NULL && chdir(chroot) != 0)
         syslog(LOG_ERR, "%s: chdir(\"%s\") failed: errno=%d", name, chroot, errno);
     umask(026);
@@ -115,11 +115,11 @@ int detach(const char *name, const char *chroot, const char *user, const char *g
     struct group *gr;
     if(group != NULL && (gr = getgrnam(group)) != NULL)
         if(setgid(gr->gr_gid) == -1)
-        	syslog(LOG_ERR, "%s: setgid() for group '%s' failed: errno=%d", name, group, errno);
+            syslog(LOG_ERR, "%s: setgid() for group '%s' failed: errno=%d", name, group, errno);
     struct passwd *pw;
     if(user != NULL && (pw = getpwnam(user)) != NULL)
         if(setuid(pw->pw_uid) == -1)
-        	syslog(LOG_ERR, "%s: setuid() for user '%s' failed: errno=%d", name, user, errno);
+            syslog(LOG_ERR, "%s: setuid() for user '%s' failed: errno=%d", name, user, errno);
 
     return 1;
 }

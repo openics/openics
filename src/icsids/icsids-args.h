@@ -24,20 +24,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DEFAULT_SCENARIO_DIR	"/etc/ics/scenario.d"
+#define DEFAULT_SCENARIO_DIR    "/etc/ics/scenario.d"
 
 typedef struct tagArgs {
     char *inputfile;    // -r
     char *interface;    // -i
     char *pinnedlist;   // -l
-	char *scenarioDir;  // -S
-	char *user;			// -u
-	char *group;		// -g
-	char *facility;     // -f
-	char *chroot;       // -R
+    char *scenarioDir;  // -S
+    char *user;         // -u
+    char *group;        // -g
+    char *facility;     // -f
+    char *chroot;       // -R
     char *filter;       //
-	int detach;			// -d
-	int debug; 			// -D
+    int detach;         // -d
+    int debug;          // -D
     int promisc;        // -p
     int maxsessions;    // -s
     int maxhosts;       // -H

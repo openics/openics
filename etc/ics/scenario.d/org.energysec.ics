@@ -1,2 +1,2 @@
-modbus	user.alert	cvs-2014-0000000	"little test"	modbus.header.function == diagnostic
+modbus  user.alert  cvs-2014-0000000    "little test"   modbus.header.function == diagnostic
 

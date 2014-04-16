@@ -37,7 +37,7 @@
 #define __USE_XOPEN_EXTENDED
 #include <pthread.h>
 
-#define DEFAULT_ALARM_INTERVAL	3
+#define DEFAULT_ALARM_INTERVAL  3
 
 void delay(long nanos);
 void signalSetup(int interval, void (*termfcn)(int signo));

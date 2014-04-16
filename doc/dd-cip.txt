@@ -1,55 +1,55 @@
 cip data dictionary
 
-	cip.header.service
-	
-	cip.request.path.type
-	cip.request.path.hasPortSegment
-	cip.request.path.hasLogicalSegment
-	cip.request.path.hasNetworkSegment
-	cip.request.path.hasSymbolicSegment
-	cip.request.path.hasDataSegment
-	cip.request.path.hasCTypeSegment
-	cip.request.path.hasETypeSegment
-	
-	cip.request.path.port.portId
-	cip.request.path.port.linkAddress
-	
-	cip.request.path.logical.type
-	cip.request.path.logical.classId
-	cip.request.path.logical.instanceId
-	cip.request.path.logical.memberId
-	cip.request.path.logical.connectionPoint
-	cip.request.path.logical.attributeId
-	
-	cip.request.path.logical.ekey.deviceType
-	cip.request.path.logical.ekey.isCompatible
-	cip.request.path.logical.ekey.majorRev
-	cip.request.path.logical.ekey.minorRev
-	cip.request.path.logical.ekey.productCode
-	cip.request.path.logical.ekey.vendorId
-	cip.request.path.logical.serviceId
-	
-	cip.request.path.network.type
-	cip.request.path.network.hasUnknownType
-	cip.request.path.network.inhibitTime
-	cip.request.path.network.extendedData
-	cip.request.path.network.extendedType
-	cip.request.path.network.hasScheduleType
-	cip.request.path.network.hasFixedTagType
-	cip.request.path.network.hasSafetyType
-	
-	cip.request.path.symbolic.asciiString
-	cip.request.path.symbolic.hasInvalidExtendedSymbol
-	cip.request.path.symbolic.numeric
-	cip.request.path.symbolic.doubleString
-	cip.request.path.symbolic.tripleString
-	
-	cip.request.path.data.ansi
-	cip.request.path.data.simple
-	
-	cip.request.data
-	
-	cip.response.status
-	cip.response.hasAddlStatus
-	cip.response.addlStatus
-	cip.response.data
+    cip.header.service
+    
+    cip.request.path.type
+    cip.request.path.hasPortSegment
+    cip.request.path.hasLogicalSegment
+    cip.request.path.hasNetworkSegment
+    cip.request.path.hasSymbolicSegment
+    cip.request.path.hasDataSegment
+    cip.request.path.hasCTypeSegment
+    cip.request.path.hasETypeSegment
+    
+    cip.request.path.port.portId
+    cip.request.path.port.linkAddress
+    
+    cip.request.path.logical.type
+    cip.request.path.logical.classId
+    cip.request.path.logical.instanceId
+    cip.request.path.logical.memberId
+    cip.request.path.logical.connectionPoint
+    cip.request.path.logical.attributeId
+    
+    cip.request.path.logical.ekey.deviceType
+    cip.request.path.logical.ekey.isCompatible
+    cip.request.path.logical.ekey.majorRev
+    cip.request.path.logical.ekey.minorRev
+    cip.request.path.logical.ekey.productCode
+    cip.request.path.logical.ekey.vendorId
+    cip.request.path.logical.serviceId
+    
+    cip.request.path.network.type
+    cip.request.path.network.hasUnknownType
+    cip.request.path.network.inhibitTime
+    cip.request.path.network.extendedData
+    cip.request.path.network.extendedType
+    cip.request.path.network.hasScheduleType
+    cip.request.path.network.hasFixedTagType
+    cip.request.path.network.hasSafetyType
+    
+    cip.request.path.symbolic.asciiString
+    cip.request.path.symbolic.hasInvalidExtendedSymbol
+    cip.request.path.symbolic.numeric
+    cip.request.path.symbolic.doubleString
+    cip.request.path.symbolic.tripleString
+    
+    cip.request.path.data.ansi
+    cip.request.path.data.simple
+    
+    cip.request.data
+    
+    cip.response.status
+    cip.response.hasAddlStatus
+    cip.response.addlStatus
+    cip.response.data

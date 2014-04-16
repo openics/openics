@@ -84,10 +84,10 @@ typedef struct tagIcsHash {
 } IcsHash;
 
 typedef enum tagIcsHashAlgorithm {
-	SCHA_DEFAULT = 0,
-	SCHA_DJB2,
-	SCHA_SDBM,
-	SCHA_ELF
+    SCHA_DEFAULT = 0,
+    SCHA_DJB2,
+    SCHA_SDBM,
+    SCHA_ELF
 } IcsHashAlgorithm;
 
 int icsHashFree(IcsHash *h);
@@ -105,8 +105,8 @@ typedef struct tagIcsFifoItem {
 } IcsFifoItem;
 
 typedef struct tagIcsFifo {
-	IcsFifoItem *h;
-	IcsFifoItem *t;
+    IcsFifoItem *h;
+    IcsFifoItem *t;
 } IcsFifo;
 
 IcsFifo *icsFifoCreate(void);
@@ -115,9 +115,9 @@ int icsFifoPush(IcsFifo *fifo, IcsOpaque *v);
 IcsOpaque *icsFifoPop(IcsFifo *fifo);
 
 typedef struct tagIcsRx {
-	IcsOpaque *p;
-	IcsOpaque *pe;
-	int global;
+    IcsOpaque *p;
+    IcsOpaque *pe;
+    int global;
 } IcsRx;
 
 iecSINT **icsRxMatch(const iecSINT *s, const iecSINT *rx);

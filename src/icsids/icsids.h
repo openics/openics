@@ -52,15 +52,15 @@
 #endif
 
 #ifndef ENABLE_TCPREASM
-	#define ENABLE_TCPREASM
+    #define ENABLE_TCPREASM
 #endif
 #include <nids.h>
 
 #include <ics.h>
 
-#define MAX_FLOW_DESCRIPTION	128
-#define MAX_PINNED_PORTS		1024
-#define IDLE_DELAY				1000000000
+#define MAX_FLOW_DESCRIPTION    128
+#define MAX_PINNED_PORTS        1024
+#define IDLE_DELAY              1000000000
 
 typedef enum tagStreamFlag {
     StreamFlagStateless = 0,
@@ -75,21 +75,21 @@ typedef enum tagStreamFlag {
 } StreamFlag;
 
 typedef struct tagIcsState {
-	IcsQueue  *packets;
-	char      *rvbuf;
+    IcsQueue  *packets;
+    char      *rvbuf;
     char      pcapError[PCAP_ERRBUF_SIZE];
-	pcap_t    *pcap;
-	pthread_t dequeueThread;
+    pcap_t    *pcap;
+    pthread_t dequeueThread;
 } IcsState;
 
 typedef struct tagIcsScenario {
-	int   protocol;
-	int   priority;
-	char *proto;
-	char *cve;
-	char *description;
-	IcsDetectItem *di;
-	struct tagIcsScenario *next;
+    int   protocol;
+    int   priority;
+    char *proto;
+    char *cve;
+    char *description;
+    IcsDetectItem *di;
+    struct tagIcsScenario *next;
 } IcsScenario;
 
 struct pcapbundle {

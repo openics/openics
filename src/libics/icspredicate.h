@@ -29,100 +29,100 @@
 
 #include "ics.h"
 
-#define ICS_SHOVENUMBER(label, field) {									\
-	IcsPredicateValue *v = icsCreatePredicateNumber(field);				\
-	icsHashSetItem(transaction->variables, label, v);						\
+#define ICS_SHOVENUMBER(label, field) {                                 \
+    IcsPredicateValue *v = icsCreatePredicateNumber(field);             \
+    icsHashSetItem(transaction->variables, label, v);                       \
 }
 
-#define ICS_SHOVESTRING(label, field) {									\
-	IcsPredicateValue *v = icsCreatePredicateString(field);				\
-	icsHashSetItem(transaction->variables, label, v);						\
+#define ICS_SHOVESTRING(label, field) {                                 \
+    IcsPredicateValue *v = icsCreatePredicateString(field);             \
+    icsHashSetItem(transaction->variables, label, v);                       \
 }
 
 #define ICS_SHOVEDATA(label, field, size, length)
 
-#define ICS_SHOVEARRAY(label, base, field, link) {						\
-	IcsPredicateValue *a = icsCreatePredicateArray();					\
-	IcsOpaque *b = base;													\
-	while(base != NULL) { 		                                    		\
-		IcsPredicateValue *v = icsCreatePredicateNumber(base->field);	\
-		icsAppendPredicateValue(a, v);									\
-		base = base->link;													\
-	}																		\
-	base = b;																\
-	icsHashSetItem(transaction->variables, label, a);						\
+#define ICS_SHOVEARRAY(label, base, field, link) {                      \
+    IcsPredicateValue *a = icsCreatePredicateArray();                   \
+    IcsOpaque *b = base;                                                    \
+    while(base != NULL) {                                                   \
+        IcsPredicateValue *v = icsCreatePredicateNumber(base->field);   \
+        icsAppendPredicateValue(a, v);                                  \
+        base = base->link;                                                  \
+    }                                                                       \
+    base = b;                                                               \
+    icsHashSetItem(transaction->variables, label, a);                       \
 }
 
 typedef enum tagIcsPredicateValueType {
-	SPVT_NONE,
-	SPVT_NUMERIC,
-	SPVT_STRING,
-	SPVT_ARRAY
+    SPVT_NONE,
+    SPVT_NUMERIC,
+    SPVT_STRING,
+    SPVT_ARRAY
 } IcsPredicateValueType;
 
 typedef enum tagIcsPredicateTokenType {
-	SPTT_NONE,
-	SPTT_NAME,
-	SPTT_NUMBER,
-	SPTT_STRING,
-	SPTT_END,
-	SPTT_BITSHL,
-	SPTT_BITSHR,
-	SPTT_BITINV = '~',
-	SPTT_CAT = '.',
-	SPTT_PLUS = '+',
-	SPTT_MINUS = '-',
-	SPTT_MULTIPLY = '*',
-	SPTT_DIVIDE = '/',
-	SPTT_ASSIGN = '=',
-	SPTT_LHPAREN = '(',
-	SPTT_RHPAREN = ')',
-	SPTT_LBRACKET = '[',
-	SPTT_RBRACKET = ']',
-	SPTT_COMMA = ',',
-	SPTT_NOT = '!',
-	SPTT_BITAND = '&',
-	SPTT_BITOR = '|',
-	SPTT_BITXOR = '^',
+    SPTT_NONE,
+    SPTT_NAME,
+    SPTT_NUMBER,
+    SPTT_STRING,
+    SPTT_END,
+    SPTT_BITSHL,
+    SPTT_BITSHR,
+    SPTT_BITINV = '~',
+    SPTT_CAT = '.',
+    SPTT_PLUS = '+',
+    SPTT_MINUS = '-',
+    SPTT_MULTIPLY = '*',
+    SPTT_DIVIDE = '/',
+    SPTT_ASSIGN = '=',
+    SPTT_LHPAREN = '(',
+    SPTT_RHPAREN = ')',
+    SPTT_LBRACKET = '[',
+    SPTT_RBRACKET = ']',
+    SPTT_COMMA = ',',
+    SPTT_NOT = '!',
+    SPTT_BITAND = '&',
+    SPTT_BITOR = '|',
+    SPTT_BITXOR = '^',
 
-	// comparisons
-	SPTT_LT = '<',
-	SPTT_GT = '>',
-	SPTT_LE,
-	SPTT_GE,
-	SPTT_EQ,
-	SPTT_NE,
-	SPTT_AND,
-	SPTT_OR,
-	SPTT_IN,
+    // comparisons
+    SPTT_LT = '<',
+    SPTT_GT = '>',
+    SPTT_LE,
+    SPTT_GE,
+    SPTT_EQ,
+    SPTT_NE,
+    SPTT_AND,
+    SPTT_OR,
+    SPTT_IN,
 
-	// special assignments
-	SPTT_ASSIGN_ADD,
-	SPTT_ASSIGN_CAT,
-	SPTT_ASSIGN_SUB,
-	SPTT_ASSIGN_MUL,
-	SPTT_ASSIGN_DIV
+    // special assignments
+    SPTT_ASSIGN_ADD,
+    SPTT_ASSIGN_CAT,
+    SPTT_ASSIGN_SUB,
+    SPTT_ASSIGN_MUL,
+    SPTT_ASSIGN_DIV
 } IcsPredicateTokenType;
 
 typedef struct tagIcsPredicateValue {
-	IcsPredicateValueType type;
-	iecLREAL d;
-	iecSINT  *s;
-	iecUINT  count;
-	struct tagIcsPredicateValue *next;
+    IcsPredicateValueType type;
+    iecLREAL d;
+    iecSINT  *s;
+    iecUINT  count;
+    struct tagIcsPredicateValue *next;
 } IcsPredicateValue;
 
 typedef struct tagIcsPredicateParseContext {
-	IcsPredicateTokenType type;
-	IcsPredicateValue     *value;
-	iecSINT *token;
-	iecSINT *predicate;
-	iecSINT *pointer;
-	IcsHash *globals;
-	IcsHash *constants;
-	IcsHash *variables;
-	IcsHash *locals;
-	IcsFifo *output;
+    IcsPredicateTokenType type;
+    IcsPredicateValue     *value;
+    iecSINT *token;
+    iecSINT *predicate;
+    iecSINT *pointer;
+    IcsHash *globals;
+    IcsHash *constants;
+    IcsHash *variables;
+    IcsHash *locals;
+    IcsFifo *output;
 } IcsPredicateParseContext;
 
 IcsFifo           *icsPredicateEvaluate(iecSINT *predicate,

@@ -1,24 +1,24 @@
 dnp3 data dictionary
 
-	dnp3.datalink.function
-	dnp3.datalink.control
-	dnp3.datalink.source
-	dnp3.datalink.destination
-	dnp3.datalink.hasInvalidChecksum
-	
-	dnp3.transport.control
-	dnp3.transport.sequence
-	dnp3.transport.hasFirstFragment
-	dnp3.transport.hasLastFragment
-	dnp3.transport.hasSequenceError
-	dnp3.transport.hasInvalidChecksum
-	
-	dnp3.application.control
-	dnp3.application.function
-	dnp3.application.indication
-	dnp3.application.confirm
-	dnp3.application.unsolicited
-	dnp3.application.hasInvalidFunction
-	dnp3.application.object.type
-	dnp3.application.object.index
-	dnp3.application.object.qualifier
+    dnp3.datalink.function
+    dnp3.datalink.control
+    dnp3.datalink.source
+    dnp3.datalink.destination
+    dnp3.datalink.hasInvalidChecksum
+    
+    dnp3.transport.control
+    dnp3.transport.sequence
+    dnp3.transport.hasFirstFragment
+    dnp3.transport.hasLastFragment
+    dnp3.transport.hasSequenceError
+    dnp3.transport.hasInvalidChecksum
+    
+    dnp3.application.control
+    dnp3.application.function
+    dnp3.application.indication
+    dnp3.application.confirm
+    dnp3.application.unsolicited
+    dnp3.application.hasInvalidFunction
+    dnp3.application.object.type
+    dnp3.application.object.index
+    dnp3.application.object.qualifier
