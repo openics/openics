@@ -11,9 +11,9 @@ PRELIMINARIES:
 
 This is pre-release software. By obtaining and using this software, you assume
 all responsibility for all outcomes. Before using, you are (as always) advised
-to study the sourcecode. You will hold the developers and sponsors of icslib
+to study the sourcecode. You will hold the developers and sponsors of openics
 innocent of any damages (however unlikely) that you may incur as a demonstrable
-consequence of using icslib, or any derived artifacts thereof.
+consequence of using openics, or any derived artifacts thereof.
 
 
 WHAT IS IT?
@@ -21,26 +21,22 @@ WHAT IS IT?
 ICS stands for Industrial Control System.
 
 openics is a library that attempts to decode sniffed control network traffic.
-Industrial control protocols are complex beasts; therefore icslib is a work
+Industrial control protocols are complex beasts; therefore openics is a work
 in progress. Currently openics supports MODBUS, DNP3, EIP/CIP. Other protocols
 are planned, the architecture is extensible. The authors and sponsors of openics
 do not make any claims as to the completeness of any supported protocol 
 implementations.
 
 
-HOW TO BUILD
+HOW TO BUILD:
 
-The build has only been tested on RedHat, CentOS, and Fedora so far (sad, I know). 
-The fasted way to build is as follows:
-
-	tar -xozf openics-1.0.tar.gz
-	cd ics
-	./remake.sh
+The build has only been tested on RedHat, CentOS, and Fedora so far. 
+The fasted way to build is by running rebuild.sh
 
 
 PREREQUISITES:
 
-icslib requires pcre-devel, libpcap-devel, libnet-devel, and libnids-1.24 with
+openics requires pcre-devel, libpcap-devel, libnet-devel, and libnids-1.24 with
 the tcp restart patch. libnids-1.24 is included under openics/nids, along with a 
 build script that builds and installs libnids in the manner that openics intends
 to use it.
@@ -81,8 +77,9 @@ Example:
 
 	modbus  alert   cvs-2014-0000000    Modbus listen mode   modbus.header.function == diagnostic && modbus.request.subcode == force_listen_mode && modbus.response.status == status_ok
 
-By default, icsids uses syslog facility 'user', but this can be changed with the -f parameter. 
-At the time of this writing, syslog is the only supported logging mechanism.
+By default, icsids uses syslog facility 'user', but this can be changed with 
+the -f parameter. At the time of this writing, syslog is the only supported 
+logging mechanism.
 
 Syntax information can be found in openics/doc. Check the data dictionary files 
 for the various protocols (work in progress).
@@ -92,7 +89,7 @@ TESING USING PACKET CAPTURES:
 
 Some packet captures are included for testing (openics/testdata). Quality varies.
 If you possess anonymized packet captures of control network traffic, please
-make them available to help enhance icslib. As good way to anonymize packet 
+make them available to help enhance openics. As good way to anonymize packet 
 capture files, you can download and use scrub-tcpdump 
 
 	(http://scrub-tcpdump.sourceforge.net/)
@@ -118,7 +115,7 @@ HOW TO CONTRIBUTE
 3) Let me know if you want to take on a new protocol (yikes!)
 
 4) Consider funding continuing development through EnergySec.org. To 
-   give you and idea, minimum expense of a senior developer is $80/h.
+   give you an idea, minimum expense of a senior developer is $80/h.
    Adding an additional protocol, depending on complexity, can range
    from 100 to 500 man hours, at a cost of between $8,000 and $40,000.
 
