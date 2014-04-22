@@ -83,7 +83,7 @@ To write a program capable of using openics, do the following:
 
         IcsParseResult r = icsParse(ICS_LAYER_APPLICATION,
                                     stack->application.primaryProtocol,
-                                    ICS_MODE_RQ,
+                                    ICS_MODE_RS,
                                     data, byteCount, stack);
 
         Same as step 5), except that you pass ICS_MODE_RS (response) instead
@@ -107,7 +107,7 @@ To write a program capable of using openics, do the following:
         IcsHash   *h = transaction->variables;
         iecSINT   *name;
         IcsOpaque *value = icsHashFirstItem(h, &name);
-        do {
+        if(value != NULL) do {
             printf("Name:%s Value:%s\n", name, value);
         } while((value = icsHashNextItem(h, &name)) != NULL);
 
@@ -129,6 +129,11 @@ To write a program capable of using openics, do the following:
 
         If the predicate matches the transaction data, the function returns
         1 (true).
+
+	9)  Free up resources associated with libics by calling:
+
+		icsUninitialize();
+
 
 DATA TYPES
 
