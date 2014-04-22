@@ -355,11 +355,12 @@ IcsParseResult       icsParse(IcsLayer startLayer, IcsProtocol protocol, IcsMode
 
 IcsProtocol          icsProbe(IcsLayer startLayer, IcsProtocol protocol,
                               iecBYTE *data, iecUDINT octets);
+IcsProtocol          icsWalkProtocols(IcsStack *stack, IcsProtocol from);
 
-IcsDetectItem       *icsMunge(const iecSINT *keyword, const iecSINT *options);
+IcsDetectItem       *icsMunge(IcsProtocol protocol, const iecSINT *predicate);
 void                 icsFreeDetectItem(IcsDetectItem *item);
 
-IcsStack            *icsStackAllocate(void);
+IcsStack            *icsStackAllocate(IcsProtocol primaryProtocol);
 void                 icsStackFree(IcsStack *);
 
 IcsTransaction      *icsTransactionNew(IcsStack *stack, IcsProtocol proto, iecSINT *key, IcsOpaque *(*initializer)(void), iecUINT ttl, iecBOOL pseudo);

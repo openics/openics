@@ -1,8 +1,49 @@
-cip data dictionary
+CIP DATA DICTIONARY
 
-    cip.header.service
-    
-    cip.request.path.type
+    cip.header.service (available constants below)
+        get_attr_all
+        set_attr_all
+        get_attr_list
+        set_attr_list
+        reset
+        start
+        stop
+        create
+        delete
+        msp
+        apply_attr
+        get_attr
+        set_attr
+        find_next_obj
+        restore
+        save
+        noop
+        get_member
+        set_member
+        insert_member
+        remove_member
+        group_sync
+        kick_timer
+        open_conn
+        close_conn
+        stop_conn
+        change_start
+        get_status
+        change_done
+        audit_change
+        forward_open
+        large_forward_open
+        get_conn_owner
+
+    cip.request.path.type (available constants below)
+        port_segment
+        logical_segment
+        network_segment
+        symbolic_segment
+        data_segment
+        ctype_segment
+        etype_segment
+
     cip.request.path.hasPortSegment
     cip.request.path.hasLogicalSegment
     cip.request.path.hasNetworkSegment
@@ -10,46 +51,183 @@ cip data dictionary
     cip.request.path.hasDataSegment
     cip.request.path.hasCTypeSegment
     cip.request.path.hasETypeSegment
-    
+        true
+        false
+
     cip.request.path.port.portId
     cip.request.path.port.linkAddress
-    
+
     cip.request.path.logical.type
+        class_id
+        instance_id
+        member_id
+        connection_point
+        attribute_id
+        special
+        service_id
+
     cip.request.path.logical.classId
+        identity
+        message_router
+        devicenet
+        assembly
+        connection
+        connection_manager
+        register
+        discrete_input_point
+        discrete_output_point
+        analog_input_point
+        analog_output_point
+        presence_sensing
+        parameter
+        parameter_group
+        group
+        discrete_input_group
+        discrete_output_group
+        discrete_group
+        analog_input_group
+        analog_output_group
+        analog_group
+        position_sensor
+        position_controller_supervisor
+        position_controller
+        block_sequencer
+        command_block
+        motor_data
+        control_supervisor
+        acdc_drive
+        acknowledge_handler
+        overload
+        softstart
+        selection
+        s_device_supervisor
+        s_analog_sensor
+        s_analog_actuator
+        s_single_stage_controller
+        s_gas_calibration
+        trip_point
+        drive_data
+        file
+        s_partial_pressure
+        safety_supervisor
+        safety_validator
+        safety_discrete_output_point
+        safety_discrete_output_group
+        safety_discrete_input_point
+        safety_discrete_input_group
+        safety_dual_channel_output
+        s_sensor_calibration
+        event_log
+        motion_axis
+        time_sync
+        modbus
+        controlnet
+        controlnet_keeper
+        controlnet_scheduling
+        connection_configuration
+        port
+        tcpip_interface
+        ethernet_link
+        componet_link
+        componet_repeater
+
     cip.request.path.logical.instanceId
     cip.request.path.logical.memberId
     cip.request.path.logical.connectionPoint
     cip.request.path.logical.attributeId
-    
-    cip.request.path.logical.ekey.deviceType
+
     cip.request.path.logical.ekey.isCompatible
+        true
+        false
+
+    cip.request.path.logical.ekey.deviceType
     cip.request.path.logical.ekey.majorRev
     cip.request.path.logical.ekey.minorRev
     cip.request.path.logical.ekey.productCode
     cip.request.path.logical.ekey.vendorId
     cip.request.path.logical.serviceId
-    
+
     cip.request.path.network.type
-    cip.request.path.network.hasUnknownType
+        schedule
+        fixed_tag
+        prod_inhibit
+        safety
+        extended
+
     cip.request.path.network.inhibitTime
     cip.request.path.network.extendedData
     cip.request.path.network.extendedType
+
+    cip.request.path.network.hasUnknownType
     cip.request.path.network.hasScheduleType
     cip.request.path.network.hasFixedTagType
     cip.request.path.network.hasSafetyType
-    
-    cip.request.path.symbolic.asciiString
+        true
+        false
+
     cip.request.path.symbolic.hasInvalidExtendedSymbol
+        true
+        false
+
+    cip.request.path.symbolic.asciiString
     cip.request.path.symbolic.numeric
     cip.request.path.symbolic.doubleString
     cip.request.path.symbolic.tripleString
-    
     cip.request.path.data.ansi
     cip.request.path.data.simple
-    
     cip.request.data
-    
+
     cip.response.status
+        success
+        failure
+        no_resource
+        bad_data
+        bad_path
+        bad_class_instance
+        partial_data
+        conn_lost
+        bad_service
+        bad_attr_data
+        attr_list_error
+        already_in_mode
+        bad_obj_mode
+        obj_exists
+        attr_not_settable
+        permission_denied
+        dev_in_wrong_state
+        reply_too_large
+        frag_primitive
+        config_too_small
+        undefined_attr
+        config_too_big
+        obj_does_not_exist
+        no_frag
+        data_not_saved
+        data_write_failure
+        request_too_large
+        response_too_large
+        missing_list_data
+        invalid_list_status
+        service_error
+        conn_failure
+        invalid_parameter
+        write_once_failure
+        invalid_reply
+        buffer_overflow
+        message_format
+        bad_key_in_path
+        bad_path_size
+        unexpected_attr
+        invalid_member
+        member_not_settable
+        g2_server_failure
+        unknown_mb_error
+        still processing
+
     cip.response.hasAddlStatus
+        true
+        false
+
     cip.response.addlStatus
     cip.response.data
+    

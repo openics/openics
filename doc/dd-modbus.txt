@@ -1,16 +1,78 @@
 modbus data dictionary
 
     modbus.header.function
+        read_coils
+        read_discrete_inputs
+        read_holding_registers
+        read_input_registers
+        write_single_coil
+        write_single_register
+        read_exception_status
+        diagnostic
+        get_comm_event_counter
+        get_comm_event_log
+        write_multiple_coils
+        write_multiple_registers
+        report_slave_id
+        read_file_record
+        write_file_record
+        mask_write_register
+        read_write_multiple_registers
+        read_fifo_queue
+        encapsulated_interface_transport
+
     modbus.header.functionClass
+        public_function
+        user_function
+
     modbus.header.functionSubtype
+        reserved_function
+        wellknown_function
+        notinuse_function
+        encapsulation_function
+
     modbus.header.hasErrorResponse
     modbus.header.hasUnknownFunction
+        true
+        false
+
     modbus.header.transactionId
     modbus.header.unitId
-    
+
     modbus.response.status
+        status_ok
+        illegal_function
+        illegal_data_address
+        illegal_data_value
+        slave_device_failure
+        acknowledge
+        slave_device_busy
+        memory_parity_error
+        gateway_path_unavailable
+        gateway_unresponsive
+
     modbus.request.subcode
+        get_query_data
+        restart_slave
+        get_diag_register
+        change_delimiter
+        force_listen_mode
+        clear_counters
+        get_bus_msg_count
+        get_bus_err_count
+        get_slave_msg_count
+        get_slave_noresp_count
+        get_slave_nak_count
+        get_slave_busy_count
+        get_bus_overrun_count
+        clear_overrun_stats
+
     modbus.request.mei
-    
+        encapsulation_x
+        encapsulation_y
+        canopen_request
+        read_device_info
+
     modbus.request.data
     modbus.response.data
+

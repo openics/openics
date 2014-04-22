@@ -270,9 +270,10 @@ IcsParseResult icsParse(IcsLayer startLayer, IcsProtocol protocol, IcsMode mode,
     return stack->lastError;
 }
 
-IcsStack *icsStackAllocate(void)
+IcsStack *icsStackAllocate(IcsProtocol primaryProtocol)
 {
     ICS_TMEMORY(stack, IcsStack);
+    stack->application.primaryProtocol = primaryProtocol;
     return stack;
 }
 
@@ -285,7 +286,7 @@ void icsStackFree(IcsStack *stack)
 }
 
 IcsProtocol icsProbe(IcsLayer startLayer, IcsProtocol protocol,
-                         iecBYTE *data, iecUDINT octets)
+                     iecBYTE *data, iecUDINT octets)
 {
     IcsProtocol result = ICS_PROTO_NONE;
 
@@ -306,29 +307,35 @@ IcsProtocol icsProbe(IcsLayer startLayer, IcsProtocol protocol,
     return result;
 }
 
-IcsDetectItem *icsMunge(const iecSINT *keyword, const iecSINT *options)
+IcsProtocol icsWalkProtocols(IcsStack *stack, IcsProtocol from)
+{
+    // For now we support the primary and ONE 'other' protocol
+    if(from == ICS_PROTO_NONE)
+        return stack->application.primaryProtocol;
+    IcsProtocol p;
+    for(p = ICS_PROTO_NONE + 1; p < ICS_PROTO_DETECT; p++) {
+        if(stack->application.transactionRoots[p] != NULL && p != from)
+            return p;
+    }
+    return ICS_PROTO_NONE;
+}
+
+IcsDetectItem *icsMunge(IcsProtocol proto, const iecSINT *predicate)
 {
     IcsDetectItem *item = NULL;
-    if(strncmp(keyword, "dnp3", 4) == 0)
-        item = icsMungeDnp3(keyword, options);
-    else
-    if(strncmp(keyword, "modbus", 6) == 0)
-        item = icsMungeModbus(keyword, options);
-    else
-    if(strncmp(keyword, "enip", 4) == 0)
-        item = icsMungeEnip(keyword, options);
-    else
-    if(strncmp(keyword, "cip", 3) == 0)
-        item = icsMungeCip(keyword, options);
+    switch(proto) {
+        case ICS_PROTO_DNP3:    item = icsMungeDnp3  (NULL, predicate); break;
+        case ICS_PROTO_MODBUS:  item = icsMungeModbus(NULL, predicate); break;
+        case ICS_PROTO_ENIP:    item = icsMungeEnip  (NULL, predicate); break;
+        case ICS_PROTO_CIP:     item = icsMungeCip   (NULL, predicate); break;
+        default: break;
+    }
     return item;
 }
 
 void icsFreeDetectItem(IcsDetectItem *item)
 {
-    // TODO: don't duplicate globals and constants for each IcsDetectItem
     if(item != NULL) {
-        icsHashFree(item->globals);
-        icsHashFree(item->constants);
         ICS_FREE(item->predicate);
         ICS_FREE(item);
     }

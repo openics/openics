@@ -1,11 +1,34 @@
-enip data dictionary
+ENIP DATA DICTIONARY
 
     eip.header.command
+        nop
+        list_services
+        list_identity
+        list_interfaces
+        register_session
+        unregister_session
+        send_rr_data
+        send_unit_data
+        indicate_status
+        cancel
+
     eip.header.invalidCommand
     eip.header.invalidOptions
+        true
+        false
+
     eip.header.options
     eip.header.session
+
     eip.header.status
+        success
+        invalid_command
+        out_of_memory
+        incorrect_data
+        invalid_session
+        invalid_length
+        unsupported_revision
+
     eip.header.hasNop
     eip.header.hasListServices
     eip.header.hasListIdentity
@@ -17,31 +40,39 @@ enip data dictionary
     eip.header.hasIndicateStatus
     eip.header.hasCancel
     eip.header.hasUnknown
-    
+        true
+        false
+
     eip.cpf.types
-    eip.cpf.hasConnectedAddress
     eip.cpf.connectedAddressId
-    eip.cpf.hasConnectedTransport
     eip.cpf.connectedTransportSeq
+    eip.cpf.o2tSockAddr.address
+    eip.cpf.o2tSockAddr.family
+    eip.cpf.o2tSockAddr.port
+    eip.cpf.t2oSockAddr.address
+    eip.cpf.t2oSockAddr.family
+    eip.cpf.t2oSockAddr.port
+    eip.cpf.sequencedAddressId
+    eip.cpf.sequencedAddressSeqNo
+
+    eip.cpf.hasConnectedAddress
+    eip.cpf.hasConnectedTransport
     eip.cpf.hasListIdentity
     eip.cpf.hasListServices
     eip.cpf.hasNullAddress
     eip.cpf.haso2tSockAddress
-    eip.cpf.o2tSockAddr.address
-    eip.cpf.o2tSockAddr.family
-    eip.cpf.o2tSockAddr.port
     eip.cpf.hast2oSockAddress
-    eip.cpf.t2oSockAddr.address
-    eip.cpf.t2oSockAddr.family
-    eip.cpf.t2oSockAddr.port
     eip.cpf.hasSequencedAddress
-    eip.cpf.sequencedAddressId
-    eip.cpf.sequencedAddressSeqNo
     eip.cpf.hasUnconnectedMessage
+        true
+        false
 
-    eip.command.listServices.capabilities
     eip.command.listServices.doesTCP
     eip.command.listServices.doesUDP
+        true
+        false
+
+    eip.command.listServices.capabilities
     eip.command.listServices.name
     eip.command.listServices.type
     eip.command.listServices.version
@@ -60,22 +91,44 @@ enip data dictionary
     eip.command.listIdentity.vendorId
     eip.command.listInterfaces.type
     eip.command.registerSession.flags
-    eip.command.registerSession.hasInvalidDataLength
-    eip.command.registerSession.hasNonZeroOptions
     eip.command.registerSession.version
+
+    eip.command.registerSession.hasInvalidDataLength
+
+    eip.command.registerSession.hasNonZeroOptions
+        true
+        false
+
     eip.command.unregisterSession.hasInvalidDataLength
     eip.command.unregisterSession.hasNonZeroOptions
     eip.command.unregisterSession.hasNonZeroStatus
     eip.command.unregisterSession.hasZeroSession
+        true
+        false
+
     eip.command.sendRRData.hasInvalidCip
     eip.command.sendRRData.hasInvalidHeaderLength
+        true
+        false
+
     eip.command.sendRRData.interface
     eip.command.sendRRData.timeout
+
     eip.command.sendUnitData.hasInvalidCip
     eip.command.sendUnitData.hasInvalidHeaderLength
     eip.command.sendUnitData.hasNonZeroTimeout
+        true
+        false
+
     eip.command.sendUnitData.interface
     eip.command.sendUnitData.timeout
+
     eip.command.cancel.isCanceled
+        true
+        false
+
     eip.command.indicateStatus.isStatusRequested
+        true
+        false
+
     eip.command.unknown.length

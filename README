@@ -1,10 +1,10 @@
 CONTACTS:
 
 Primary Developer:
-	Scott Weston, scott.david.weston@gmail.com
+    Scott Weston, scott.david.weston@gmail.com
 
 Copyright Holder:
-	Steve Parker, steve@energysec.org
+    Steve Parker, steve@energysec.org
 
 
 PRELIMINARIES:
@@ -50,18 +50,18 @@ This IDS is based on 'scenarios', which from conventional IDS signatures in that
 they support a rich predicate syntax. For example, the look for the condition in 
 which somebody successfully put a MODBUS controller in listen mode, we could write
 
-	modbus.header.function == diagnostic && 
-	modbus.request.subcode == force_listen_mode &&
-	modbus.response.status == status_ok
+    modbus.header.function == diagnostic && 
+    modbus.request.subcode == force_listen_mode &&
+    modbus.response.status == status_ok
 
 By default, scenarios are read from /etc/ics/scenario.d, although this can be
 changed with the -S parameter. Each scenario file should be named as follows:
 
-	domain.organization.ics
+    domain.organization.ics
 
 i.e.
 
-	org.energysec.ics
+    org.energysec.ics
 
 This gives any given organization an opportunity to contribute scenarios to 
 the commonwealth.
@@ -71,11 +71,11 @@ sourced in alphabetical order.
 
 A full scenario is formed as follows (must currently all be on a single line):
 
-	protocol<tab>syslog-priority<tab>reference<tab>description<tab>predicate
+    protocol<tab>syslog-priority<tab>reference<tab>description<tab>predicate
 
 Example:
 
-	modbus  alert   cvs-2014-0000000    Modbus listen mode   modbus.header.function == diagnostic && modbus.request.subcode == force_listen_mode && modbus.response.status == status_ok
+    modbus  alert   cvs-2014-0000000    Modbus listen mode   modbus.header.function == diagnostic && modbus.request.subcode == force_listen_mode && modbus.response.status == status_ok
 
 By default, icsids uses syslog facility 'user', but this can be changed with 
 the -f parameter. At the time of this writing, syslog is the only supported 
@@ -92,16 +92,16 @@ If you possess anonymized packet captures of control network traffic, please
 make them available to help enhance openics. As good way to anonymize packet 
 capture files, you can download and use scrub-tcpdump 
 
-	(http://scrub-tcpdump.sourceforge.net/)
+    (http://scrub-tcpdump.sourceforge.net/)
 
 The following bash script does a decent job:
 
-	#!/bin/bash
-	if [[ "x$1" == "x" || "x$2" == "x" ]]; then
-		echo usage: anonymize file1.pcap file2.pcap
-		exit 1
-	fi
-	scrub-tcpdump -r $1 -w $2 -o "srcip pp dstip pp"
+    #!/bin/bash
+    if [[ "x$1" == "x" || "x$2" == "x" ]]; then
+        echo usage: anonymize file1.pcap file2.pcap
+        exit 1
+    fi
+    scrub-tcpdump -r $1 -w $2 -o "srcip pp dstip pp"
 
 
 HOW TO CONTRIBUTE

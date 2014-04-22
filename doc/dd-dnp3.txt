@@ -1,24 +1,92 @@
-dnp3 data dictionary
+DNP3 DATA DICTIONARY
 
     dnp3.datalink.function
+        confirm
+        read
+        write
+        select
+        operate
+        direct_operate
+        direct_operate_nr
+        immed_freeze
+        immed_freeze_nr
+        freeze_clear
+        freeze_clear_nr
+        freeze_at_time
+        freeze_at_time_nr
+        cold_restart
+        warm_restart
+        initialize_data
+        initialize_appl
+        start_appl
+        stop_appl
+        save_config
+        enable_unsolicited
+        disable_unsolicited
+        assign_class
+        delay_measure
+        record_current_time
+        open_file
+        close_file
+        delete_file
+        get_file_info
+        authenticate_file
+        abort_file
+        activate_config
+        authenticate_req
+        authenticate_err
+        response
+        unsolicited_response
+        authenticate_response
+
     dnp3.datalink.control
     dnp3.datalink.source
     dnp3.datalink.destination
+
     dnp3.datalink.hasInvalidChecksum
-    
+        true
+        false
+
     dnp3.transport.control
     dnp3.transport.sequence
+
     dnp3.transport.hasFirstFragment
     dnp3.transport.hasLastFragment
     dnp3.transport.hasSequenceError
     dnp3.transport.hasInvalidChecksum
-    
+        true
+        false
+
+    dnp3.application.hasInvalidFunction
+        true
+        false
+
     dnp3.application.control
     dnp3.application.function
+
     dnp3.application.indication
-    dnp3.application.confirm
+        all_stations
+        class_1_events
+        class_2_events
+        class_3_events
+        need_time
+        local_control
+        device_trouble
+        device_restart
+        no_func_code_support
+        object_unknown
+        parameter_error
+        event_buffer_overflow
+        already_executing
+        config_corrupt
+        reserved_2
+        reserved_1
+
     dnp3.application.unsolicited
-    dnp3.application.hasInvalidFunction
+        true
+        false
+
+    dnp3.application.confirm
     dnp3.application.object.type
     dnp3.application.object.index
     dnp3.application.object.qualifier

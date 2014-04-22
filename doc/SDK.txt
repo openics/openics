@@ -1,0 +1,808 @@
+PRELIMINARIES
+
+The SDK has two general purposes:
+
+    1) Use it to dissect supported protocols, and incorporate this
+       functionality into your own software package for whatever (hopefully
+       legitimate) purpose.
+
+    2) Build a new dissector to broaden the applicability of openics. You
+       will go down in the annals of cool people who did something hard for
+       a good purpose.
+
+What it typically cannot be used for:
+
+    1) Openics has no innate ability to craft protocol packets and emit them
+       on a network. The project's purpose does not prescribe the need.
+
+    2) Openics does not publish non-public information about protocols. All
+       protocols supported by openics are standards based.
+
+How does openics distinguish itself from other solutions?
+
+    1) Openics builds data dictionaries from network packets based on
+       protocol semantics.
+
+    2) Openics supports algorithmic predicates which can be used to script
+       scenarios against the data dictionaries.
+
+    3) Through the easy-to-understand data dictionaries and the straight-
+       forward predicate syntax, openics bridges the gap between SCADA/ICS
+       personnel and network security professionals.
+
+HOW DO I USE IT
+
+Follow the README to build openics.
+
+To write a program capable of using openics, do the following:
+
+    1)  Include the ics.h header file:
+
+        #include <ics.h>
+
+    2)  Initialize the library; for now just pass NULL as defaults:
+
+        icsInitialize(NULL, NULL, NULL);
+
+    3)  Probe data to see if an ICS protocol is present:
+
+        IcsProtocol proto = icsProbe(ICS_LAYER_APPLICATION,
+                                     ICS_PROTO_DETECT,
+                                     data, byteCount);
+
+        The first parameter tells the library to treat your data as
+        if it starts at the application layer. The second parameter
+        tells the library to attempt to detect the protocol. The last
+        two parameters are your data buffer, along with its length.
+
+        If the function is able to detect an ICS protocol, it will
+        return the identifier of the protocol it detected.
+
+    4)  If an ICS protocol was found, allocate a stack pointer for it:
+
+        IcsStack stack = icsStackAllocate(protocol);
+
+    5)  Parse request data:
+
+        IcsParseResult r = icsParse(ICS_LAYER_APPLICATION,
+                                    stack->application.primaryProtocol,
+                                    ICS_MODE_RQ,
+                                    data, byteCount, stack);
+
+        Again, the first parameter tells the library to treat the data
+        as application layer data. The second parameter is the primary
+        protocol of the data passed in the 4th parameter. The third
+        parameter is the direction, in this case ICS_MODE_RQ, for request.
+        Finally, the data pointer, the byteCount, and the stack pointer
+        allocated in step 4) are passed in.
+
+        On success, the function will return ICS_RESULT_OK, or else one of
+        the other indicators from the IcsParseResult enumeration.
+
+    6)  Parse response data:
+
+        IcsParseResult r = icsParse(ICS_LAYER_APPLICATION,
+                                    stack->application.primaryProtocol,
+                                    ICS_MODE_RQ,
+                                    data, byteCount, stack);
+
+        Same as step 5), except that you pass ICS_MODE_RS (response) instead
+        of ICS_MODE_RQ.
+
+    7)  Pop completed transaction(s) off of the stack:
+
+        IcsProto proto = stack->application.primaryProtocol;
+        IcsTransaction transaction = icsTransactionPop(stack, proto);
+
+        Pass the stack pointer and the primary protocol identifier. If no
+        transaction is available, the function returns NULL. To be returned
+        by this function, a transaction must be complete, or else have failed
+        or timed out. The transaction is complete if a response was received
+        for a given request. If the response was not received in the configured
+        TTL, the transaction times out. If there was a processing error, i.e.
+        bad data, the transaction becomes available right away.
+
+    8a) With the transaction in hand, you can enumerate the data dictionary:
+
+        IcsHash   *h = transaction->variables;
+        iecSINT   *name;
+        IcsOpaque *value = icsHashFirstItem(h, &name);
+        do {
+            printf("Name:%s Value:%s\n", name, value);
+        } while((value = icsHashNextItem(h, &name)) != NULL);
+
+        Use the libics icsHashFirstItem() and icsHashNextItem() functions to
+        iterate over the values in the transaction.
+
+    8b) Or, you can perform predicate detection:
+
+        icsSINT *predicate = "modbus.header.function = diagnostic && "
+                             "modbus.request.subcode == force_listen_mode && "
+                             "modbus.response.status == status_ok";
+
+        IcsDetectItem *detectItem = icsMunge(proto, predicate);
+        iecBOOL hit = icsEvaluate(detectItem, transaction);
+
+        Use icsMunge to prepare a detect item from the protocol type and the
+        predicate; then, pass the detectItem, along with the transaction to
+        be tested, to icsEvaluate().
+
+        If the predicate matches the transaction data, the function returns
+        1 (true).
+
+DATA TYPES
+
+The following data types are derived from IEC specification 61131
+
+    iecBOOL
+        8-bit true/false value
+
+    iecSINT
+        8-bit signed integer
+
+    iecINT
+        16-bit signed integer
+
+    iecDINT
+        32-bit signed double integer
+
+    iecLINT
+        64-bit signed long double integer
+
+    iecUSINT
+        8-bit unsigned integer
+
+    iecUINT
+        16-bit unsigned integer
+
+    iecUDINT
+        32-bit unsigned double integer
+
+    iecULINT
+        64-bit unsigned long double integer
+
+    iecREAL
+        floating point number
+
+    iecLREAL
+        double floating point number
+
+    iecITIME
+        16-bit time value
+
+    iecTIME
+        32-bit time value
+
+    iecFTIME
+        floating point time value
+
+    iecLTIME
+        64-bit time value
+
+    iecDATE
+        16-bit date value
+
+    iecTIMEOFDAY
+        floating point time
+
+    iecDATAANDTIME
+        floating point date and time
+
+    iecSTRING
+        8-bit character string
+
+    iecSTRING2
+    iecSTRING3
+    iecSTRINGI
+        16-bit character string
+
+    iecSHORTSTRING
+        string with 8-bit length prefix:
+            { iecUSINT length, iecSINT *string }
+
+    iecBYTE
+        8-bit unsigned byte
+
+    iecWORD
+        16-bit unsigned word
+
+    iecDWORD
+        32-bit double word
+
+    iecLWORD
+        64-bit long double word
+
+    iecEPATH
+        Special EPATH data type consisting of 16-bit length, 16-bit type,
+        8-bit padding indicator, and a data pointer
+            { iecUSINT length, iecUSINT type, iecBOOL padded iecBYTE *data }
+
+    iecENGUNIT
+        16-bit unsigned engineering unit
+
+    iecTRUE
+
+        8-bit constant of value 1
+
+    iecFALSE
+
+        8-bit constant of value 0
+
+
+The following defininitions are required and implemented by the ICS SDK:
+
+    IcsHash
+
+        Type used for hashtable processing
+
+    IcsHashAlgorithm
+
+        Enumeration used to select a hash algorithm for hashtable processing
+
+            SCHA_DEFAULT    SCH_ELF by default
+            SCHA_DJB2       Daniel Bernstein hash algorithm
+            SCHA_SDBM       Database hash algorithm
+            SCHA_ELF        Unix ELF hash algorithm
+
+    IcsOpaque
+
+        Type-less data
+
+    IcsQueue
+
+        Type used for queue processing
+
+    IcsQueueItem
+
+        Type used to manage queued data items
+
+    IcsPredicateValue
+
+        Type used to hold variable data items for predicate processing
+
+    IcsPredicateValueType
+
+        Represents the data type in IcsPredicateValue and may be useful
+        for coercion.
+
+            SPVT_NONE       indeterminate
+            SPVT_NUMERIC    number
+            SPVT_STRING     string
+            SPVT_ARRAY      array
+
+    IcsProtocol
+
+        Currently support protocol enumeration:
+
+            ICS_PROTO_NONE   = 0
+            ICS_PROTO_DNP3   = 1
+            ICS_PROTO_ENIP   = 2
+            ICS_PROTO_CIP    = 3
+            ICS_PROTO_MODBUS = 4
+            ICS_PROTO_DETECT = 5
+            ICS_PROTO_ALL    = 6
+
+    IcsProtocolPort
+
+        Standard TCP/UDP ports numbers of support protocols:
+
+            ICS_TCP_DNP3     = 20000
+            ICS_UDP_DNP3     = 20000
+            ICS_TCP_ENIP     = 44818
+            ICS_UDP_ENIP     = 2222
+            ICS_TCP_MODBUS   = 502
+
+    IcsLayer
+
+        Starting layer at which dissection should occur. With currently
+        supported protocols, this should always be ICS_LAYER_APPLICATION.
+        Some planned protocols my be decoded at lower levels.
+
+            ICS_LAYER_LINK         = 0x0100
+            ICS_LAYER_INTERNET     = 0x0200
+            ICS_LAYER_TRANSPORT    = 0x0400
+            ICS_LAYER_APPLICATION  = 0x0800
+            ICS_LAYER_ENCAP        = 0x1000     (Encapsulated protocol)
+            ICS_LAYER_PROTOMASK    = 0x00ff
+            ICS_LAYER_MASK         = 0xff00
+
+    IcsMode
+
+            ICS_MODE_RQ  = 0    Request
+            ICS_MODE_RS  = 1    Response
+            ICS_MODE_UNK = 2    Direction not known
+
+    IcsLogLevel
+
+        The desired trace logging level:
+
+            ICS_LOGLEVEL_ERROR
+            ICS_LOGLEVEL_WARNING
+            ICS_LOGLEVEL_INFO
+            ICS_LOGLEVEL_DEBUG
+
+    IcsParseResult
+
+        Standard return values for parsing functions:
+
+            ICS_RESULT_OK               = 0
+            ICS_RESULT_SHORT            = 1 (not enough data available)
+            ICS_RESULT_INVALID          = 2
+            ICS_RESULT_OUTOFMEMORY      = 3
+            ICS_RESULT_UNKNOWNPROTOCOL  = 4
+            ICS_RESULT_BADCHECKSUM      = 5
+            ICS_RESULT_UNKNOWNFUNCTION  = 6
+            ICS_RESULT_UNKNOWNITEM      = 7
+            ICS_RESULT_NOTIMPLEMENTED   = 8
+            ICS_RESULT_INVALIDCONTEXT   = 9
+            ICS_RESULT_INVALIDCODING    = 10
+            ICS_RESULT_UNSUPPORTEDLAYER = 11
+            ICS_RESULT_NOTRANSACTION    = 12
+            ICS_RESULT_ENCAPREQUIRED    = 13 (must be encapsulated, i.e. CIP)
+            ICS_RESULT_LIMITEXCEEDED    = 14
+            ICS_RESULT_FUNCTIONIGNORED  = 15 (function ignored per config)
+
+    IcsValueType
+
+        Simple value specifier:
+
+            ICS_VALUETYPE_NONE    = 0
+            ICS_VALUETYPE_NUMERIC = 1
+            ICS_VALUETYPE_STRING  = 2
+
+    IcsHexdumpStyle
+
+        Type of hexdump desired:
+
+            ICS_HEXDUMP_PLAIN,
+            ICS_HEXDUMP_QUOTED
+
+    IcsRx
+
+        Type used for regular expression processing
+
+ICS SDK:
+
+Memory Allocation and Destruction:
+
+    IcsOpaque      *icsMalloc(size_t size);
+    void            icsFree(IcsOpaque *ptr);
+
+    icsMalloc attempts to allocate size bytes, using the mallocFunction
+    specified in the required call to icsInitialize(). If icsInitialize
+    is called with NULL for the mallocFunction, icsMalloc uses malloc.
+
+    icsFree destroys memory previously allocated using icsMalloc, using
+    the freeFunction specified in the required call to icsInitialize().
+    If icsInitialize is called with NULL for the freeFunction, icsFree
+    uses free.
+
+    IcsStack       *icsStackAllocate(void);
+    void            icsStackFree(IcsStack *);
+
+SDK Initialization and Teardown:
+
+    iecBOOL         icsInitialize(void *(*mallocFunction)(size_t size),
+                                  void (*freeFunction)(void *ptr),
+                                  char *(*configLoader)(char *name));
+
+    iecBOOL         icsUninitialize(void);
+
+    icsInitialize sets up the ICS SDK for subsequent use. The
+    mallocFunction and freeFunction can be NULL, in which case malloc
+    and free are used by all internal memory allocations. The
+    configLoader function is 'called back' in order to fetch configuration
+    parameters from localized configuration repositories.
+
+    The configLoader may be called from the SDK for the following items:
+
+        libics.hashalgorithm
+
+            Specifies which hash algorithm to use for internal hash tables.
+
+            0 (default) = Unix ELF hash
+            1           = Daniel Bernstein hash
+            2           = Database hash
+            3           = Unix ELF hash
+
+        libics.logtracefile
+
+            Specifying a path here turn on trace logging, using the level
+            specified in 'libics.loglevel'.
+
+        libics.loglevel
+
+            Higher log levels should result in more abundant trace logs.
+
+            0 (default) = Errors only
+            1           = Errors + Warnings
+            2           = Errors, Warnings, +Informational
+            3+          = Errors, Warnings, Informational, +Debug
+
+        libics.hextracefile
+
+            Specifying a path here turns on hex dumping, a useful debugging
+            tool.
+
+        libics.CIP.transactionmax
+        libics.DNP3.transactionmax
+        libics.ENIP.transactionmax
+        libics.MODBUS.transactionmax
+
+            Upper limit on per-stream protocol transactions.
+            Default = 64.
+            (Not implemented yet)
+
+        libics.CIP.avoidfuncs
+        libics.DNP3.avoidfuncs
+        libics.ENIP.avoidfuncs
+        libics.MODBUS.avoidfuncs
+
+            Primary protocol commands/functions to ignore.
+            Default = none.
+
+        libics.CIP.servertcpports
+        libics.DNP3.servertcpports
+        libics.ENIP.servertcpports
+        libics.MODBUS.servertcpports
+
+            Limit dessection of TCP data to ports in comma-seperated list.
+            Default = probe on all ports.
+            (Not implemented yet)
+
+        libics.CIP.serverudpports
+        libics.DNP3.serverudpports
+        libics.ENIP.serverudpports
+        libics.MODBUS.serverudpports
+
+            Limit dessection of UDP data to ports in comma-seperated list.
+            Default = probe on all ports.
+            (Not implemented yet)
+
+Transaction Management Functions:
+
+    Typically, ICS protocols follow a request/response paradigm. To understand
+    this in simple terms, a command is issued "do function 123", followed by a
+    response, such as "the result of function 123 is so-and-so". This is very
+    oversimplified, but that's what's going on in a nutshell. In reality
+    commands are accompanied by any amount of parameter data, and multiple
+    responses can be issued to a single command.
+
+    A transaction can be thought of as a request/response(s) exchange on a
+    given connection:
+
+        * Connection established
+
+            T1 - command
+            T1 - response
+            T2 - command
+            T3 - command
+            T3 - response
+            T4 - command
+            T2 - response
+            T2 - response
+            T4 - response
+
+        * Connection terminated
+
+    In the above example, we count four transactions.
+
+    A transaction can have one of four flags:
+
+        Open     - An unanswered request was sent
+        Cooked   - A completing response was received
+        TimedOut - No response received in specified response time window
+        Failed   - The transaction failed in some way, usually malformed data
+        Pseudo   - The transaction does not require a response
+
+    IcsTransaction *icsTransactionNew(IcsStack *stack,
+                                      IcsProtocol proto,
+                                      iecSINT *key,
+                                      IcsOpaque *(*initializer)(void),
+                                      iecUINT ttl,
+                                      iecBOOL pseudo
+    );
+
+    Create a new transaction. You must pass a valid stack pointer and identify
+    the protocol for this transacion (see IcsProtocol, above). The key, if
+    provided, can be used to access the transaction directly using the
+    icsTransactionGet() function. The initializer function, if not NULL, can be
+    used to perform custom initialization of the transaction payload. The ttl
+    specifies (in seconds) how long a request will wait for a response. The
+    pseudo flag tells the transaction not to wait for a response.
+
+    The function returns NULL on failure.
+
+    IcsTransaction *icsTransactionGet(IcsStack *stack,
+                                      IcsProtocol proto,
+                                      iecSINT *key);
+
+    Non-destructively get a transaction directly, by protocol and key.
+    Returns NULL if no transaction is found.
+
+    IcsTransaction *icsTransactionGetLast(IcsStack *stack,
+                                          IcsProtocol proto);
+
+    Non-destructively get the most recent transaction, regardless of flags.
+    Returns NULL if no transaction is available for the specified protocol.
+
+    IcsTransaction *icsTransactionPop(IcsStack *stack,
+                                      IcsProtocol proto);
+
+    Remove and return the most recent transaction that is either TimedOut,
+    Cooked, Failed, or Pseudo. Returns NULL if nothing is available for the
+    specified protocol.
+
+    iecUINT         icsTransactionSetTTL(IcsTransaction *transaction,
+                                         iecUINT ttl);
+
+    Set the time-to-live (TTL) for a transaction in seconds. Returns the value
+    of the previous TTL.
+
+    iecBOOL         icsTransactionMarkComplete(IcsTransaction *transaction);
+
+    Mark the specified transaction as complete. Returns the previous completion
+    status.
+
+    iecUDINT        icsTransactionMarkAllComplete(IcsStack *stack,
+                                                  IcsProtocol proto);
+
+    Mark all transactions of the specified protocol as Cooked. Return the
+    number of transactions successfully updated.
+
+    IcsParseResult  icsTransactionMarkFailed(IcsTransaction *transaction,
+                                             IcsParseResult r);
+
+    Mark all transactions of the specified protocol as Failed. Return the
+    number of transactions successfully updated.
+
+    iecUINT         icsTransactionPurge(IcsStack *stack, IcsProtocol proto);
+
+    Remove and free all transactions of the specified protocol. Return the
+    number of transactions actually destroyed.
+
+    iecBOOL         icsTransactionFree(IcsTransaction *transaction);
+
+    Free the memory associated with specified transacton. Careful: don't use
+    this function on a transaction that is still being managed by the stack.
+    Return iecTRUE if the function succeeds.
+
+Configuration Management Functions:
+
+    libics maintains an internal hashtable which contains configuration
+    values (name/value pairs). In addition to the callback function that can
+    be installed with icsInitialize(), values can also be set and retrieved
+    using these functions:
+
+    iecBOOL         icsConfigAddItem(iecSINT *name,
+                                     iecSINT *s,
+                                     iecLREAL d,
+                                     iecBOOL override);
+
+    Add a named string (s) or number (d), and use the override parameter to
+    instruct whether or not to clobber any existing values. Returns iecTRUE
+    on success.
+
+    iecBOOL         icsConfigAddString(iecSINT *name,
+                                       iecSINT *s,
+                                       iecBOOL override);
+
+    Add a named string (s); use override to clobber existing value. Returns
+    iecTRUE on success.
+
+    iecBOOL         icsConfigAddNumber(iecSINT *name,
+                                       iecLREAL d,
+                                       iecBOOL override);
+
+    Add a named number (d); use override to clobber existing value. Returns
+    iecTRUE on success.
+
+    IcsValue       *icsConfigGetItem(iecSINT *name);
+
+    Retrieve an IcsValue wrapper by name. Returns NULL if that item does
+    not exist.
+
+    iecSINT        *icsConfigGetString(iecSINT *name);
+
+    Retrieve a named string and return NULL if not found.
+
+    iecLREAL        icsConfigGetNumber(iecSINT *name);
+
+    Retrieve a named number and return NULL if not found.
+
+Primary Functions:
+
+    IcsParseResult  icsParse(IcsLayer startLayer, IcsProtocol protocol, IcsMode mode, iecBYTE *data, iecUDINT octets, IcsStack *stack);
+    IcsProtocol     icsProbe(IcsLayer startLayer, IcsProtocol protocol, iecBYTE *data, iecUDINT octets);
+    IcsDetectItem  *icsMunge(const iecSINT *keyword, const iecSINT *options);
+    void            icsFreeDetectItem(IcsDetectItem *item);
+    iecBOOL         icsEvaluate(IcsDetectItem *item, IcsTransaction *transaction);
+
+String and Formatting Functions:
+
+    iecUDINT *icsNumberArrayFromCommaList(iecSINT *list,
+                                          iecUDINT def,
+                                          iecUINT *pu);
+
+    Return a dynamically allocated array of unsigned double integers from the
+    comma-separated asciiz list. The number of items is returned in *pu. If
+    list is NULL, a single-item array containing def is returned.
+
+    iecSINT  *icsBin2Hexdump(iecBYTE *data, iecUDINT octets);
+
+    Return a hex representation of octets number of bytes in data. Return
+    NULL on failure.
+
+    iecUSINT *icsHexdump2Bin(iecSINT *hexdump, iecUDINT *pl);
+
+    Return the binary form of the NULL-terminated hexdump (asciiz). On success,
+    *pl will contain the number of binary bytes decoded. Return NULL on error.
+
+    iecSINT *icsRemoveQuotes(const iecSINT *s);
+
+    Remove the quotes (if any) from around the asciiz string specified in s.
+    On error return NULL. This function creates a new copy of the input string,
+    so the string that is passed does not get modified.
+
+
+Hashtable Functions:
+
+    IcsHash *icsHashCreate(int initialSize,
+                           int threshold,
+                           IcsHashAlgorithm algorithm);
+
+    Create a hashtable of initialSize, which dynamically grows when the percent
+    specified in threshold is reached. Using 80 (for 80%) is a good starting
+    point. See IcsHashAlgorithm, above, for available algorithms. Returns NULL
+    on error.
+
+    int icsHashFree(IcsHash *h);
+
+    Free the memory associated with the hashtable. Note that this function will
+    free all hashed pointer values, as well. Returns number of elements freed.
+
+    int icsHashSetItem(IcsHash *h, const iecSINT *key, const IcsOpaque *value);
+
+    Add the opaque value, identified by key, to the hashtable identified by h.
+    Setting the same key twice creates a memory leak. Remove the previous
+    value first. Returns 0 on success.
+
+    IcsOpaque *icsHashDeleteItem(IcsHash *h, const iecSINT *key);
+
+    Delete the item identified by key and return a pointer to it. Return NULL
+    if the item is not found.
+
+    IcsOpaque *icsHashFirstItem(IcsHash *h, iecSINT **key);
+
+    Enumerate the first item in the hashtable. The key is returned in *key,
+    and the value is returned. Returns NULL on error.
+
+    IcsOpaque *icsHashGetItem(IcsHash *h, const iecSINT *key);
+
+    Non-destructively retrieve the item identified by key. Returns NULL if
+    nothing is found.
+
+    IcsOpaque *icsHashNextItem(IcsHash *h, iecSINT **key);
+
+    Enumerate the next item in the hashtable. The key is returned in *key,
+    and the value is returned. Returns NULL on error.
+
+
+First-In-First-Out (FIFO) Functions:
+
+    IcsFifo *icsFifoCreate(void);
+
+    Create a new FIFO and return NULL on error.
+
+    int icsFifoFree(IcsFifo *fifo);
+
+    Free the FIFO and all contained pointers. Return number of items freed.
+
+    int icsFifoPush(IcsFifo *fifo,
+                    IcsOpaque *v);
+
+    Push an item onto the FIFO. Return 0 on error.
+
+    IcsOpaque *icsFifoPop(IcsFifo *fifo);
+
+    Pop an item off of the FIFO. Return NULL if the FIFO is empty.
+
+
+Regular Expression Functions:
+
+    iecSINT **icsRxMatch(const iecSINT *s,
+                         const iecSINT *rx);
+
+    Apply regular expression rx to the string in s. Return an array with the
+    the full match in position 0, and the captures in positions 1 to n.
+    Return NULL if there's no match.
+
+    iecSINT **icsRxSplit(const iecSINT *s,
+                         const iecSINT *rx);
+
+    Split the string in s according to the regular expression in rx. Return
+    NULL if nothing was split, else return the split up items.
+
+    iecSINT *icsRxReplace(const iecSINT *s,
+                          const iecSINT *r,
+                          const iecSINT *rx);
+
+    Replace the pattern identified in rx in the string s with the strin in r.
+    Return a the new string containing the s with the replacements applied
+    (if any), or NULL on failure.
+
+    void icsRxFreeCache(void);
+
+    Regular expressions are hashed on the fly. Use this function to wipe out
+    all hashed regular expressions.
+
+Queueing Functions:
+
+    IcsQueue maintains items until they expire. You can safely, and with very
+    good performance, add items to a queue on one thread, and read them off on
+    a different thread. This facilitates fantastically fast I/O.
+
+    IcsQueue *icsQueueCreate(int max, int ttl);
+
+    Create a new queue that can hold max items, each of which is deleted if
+    it sits in the queue in excess of ttl seconds. Return NULL on failure.
+
+    int icsQueueAddItem(IcsQueue *q, const IcsOpaque *ptr, size_t sz);
+
+    Add the item in ptr (of size sz) to the queue. If sz is -1, store ptr
+    without making a copy; else, copy the first sz bytes and store them.
+    Return 1 on success.
+
+    int icsQueueFree(IcsQueue *q);
+
+    Free the queue and delete all contained pointers. Return 0 on success.
+
+    int icsQueueIsEmpty(IcsQueue *q);
+
+    Return 1 if the queue is empty, else 0.
+
+    IcsOpaque *icsQueueGetItem(IcsQueue *q, size_t *psz);
+
+    Get the item at the head of the queue. Return the size of the item in *psz.
+    Return NULL if the queue is empty.
+
+Module Functions:
+
+    These functions must be supported by any protocol dissector module:
+
+    iecDINT         icsInitialize<proto>(char *(*configLoader)(char *name));
+
+    Initialize the protocol using the specified configLoader callback.
+    Return 1 on success.
+
+    void            icsUninitialize<proto>(void);
+
+    Free up any internal memory associated with a protocol and remove it from
+    service.
+
+    IcsParseResult  icsParse<proto>(IcsLayer startLayer,
+                                    IcsMode mode,
+                                    iecBYTE *data,
+                                    iecUDINT octets,
+                                    IcsStack *stack);
+
+    Parse the protocol starting at startLayer. Direction is specified in mode.
+    The payload will be specified in data and contain octets number of bytes.
+    State will be stored in the stack pointer. Possible parser results are
+    described in IcsParseResult, above.
+
+    IcsProtocol     icsProbe<proto>(IcsLayer startLayer,
+                                    iecBYTE *data,
+                                    iecUDINT octets);
+
+    Probe data of size octets starting at layer startLayer. Return the protocol
+    identified in IcsProtocol, described above.
+
+    void            icsFree<proto>(void *p);
+
+    Free the opaque pointer associated with the protocol.
+
+    IcsDetectItem  *icsMunge<proto>(const char *keyword, const char *options);
+
+    Prepare an IcsDetectItem based on the keyword and the options. Return NULL
+    on failure.

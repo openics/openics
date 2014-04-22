@@ -36,22 +36,21 @@ static char *describeFlow(int proto, uint32_t srcIp, uint16_t srcPort, uint32_t 
 
 static void handletcp(struct tcp_stream *ts, StreamFlag flag)
 {
+    char flow[MAX_FLOW_DESCRIPTION];
+
     unsigned long srcBytes = ts->client.count - ts->client.offset;
     if(srcBytes > 0) { // request
         iecBYTE *data = (iecBYTE *) (ts->client.data + ts->client.offset);
         if(ts->user == NULL) { // we have no state, so let's detect
             IcsProtocol proto = icsProbe(ICS_LAYER_APPLICATION, ICS_PROTO_DETECT, data, srcBytes); 
-            if(proto != ICS_PROTO_NONE) {
-                IcsStack *stack = ts->user = icsStackAllocate();
-                stack->application.primaryProtocol = proto;
-            }
+            if(proto != ICS_PROTO_NONE)
+                ts->user = icsStackAllocate(proto);
         }
         if(ts->user != NULL) {
             IcsStack *stack = ts->user;
             IcsParseResult r = icsParse(ICS_LAYER_APPLICATION, stack->application.primaryProtocol, ICS_MODE_RQ, data, srcBytes, stack); 
-            if(r != ICS_RESULT_OK) {
-                // emit parser error
-            }
+            if(r != ICS_RESULT_OK)
+                syslog(LOG_DEBUG, "%s failed to parse request", describeFlow(0x06, ntohl(ts->addr.saddr), ts->addr.source, ntohl(ts->addr.daddr), ts->addr.dest, flow, sizeof(flow)));
         }
     }
 
@@ -61,20 +60,21 @@ static void handletcp(struct tcp_stream *ts, StreamFlag flag)
         if(ts->user != NULL) {
             IcsStack *stack = ts->user;
             IcsParseResult r = icsParse(ICS_LAYER_APPLICATION, stack->application.primaryProtocol, ICS_MODE_RS, data, dstBytes, stack); 
-            if(r != ICS_RESULT_OK) {
-                // emit parser error
-            }
-            IcsScenario *curr = root[stack->application.primaryProtocol];
-            while(curr != NULL) {
-                IcsTransaction *transaction = icsTransactionPop(stack, stack->application.primaryProtocol);
-                if(transaction != NULL) {
-                    if(icsEvaluate(curr->di, transaction)) {
-                        char desc[MAX_FLOW_DESCRIPTION];
-                        syslog(curr->priority, "%s %s '%s' '%s'", describeFlow(0x06, ntohl(ts->addr.saddr), ts->addr.source, ntohl(ts->addr.daddr), ts->addr.dest, desc, sizeof(desc)), curr->proto, curr->cve, curr->description);
+            if(r != ICS_RESULT_OK)
+                syslog(LOG_DEBUG, "%s failed to parse response", describeFlow(0x06, ntohl(ts->addr.saddr), ts->addr.source, ntohl(ts->addr.daddr), ts->addr.dest, flow, sizeof(flow)));
+            IcsProtocol proto = icsWalkProtocols(stack, ICS_PROTO_NONE);
+            while(proto != ICS_PROTO_NONE) {
+                IcsScenario *curr = root[proto];
+                while(curr != NULL) {
+                    IcsTransaction *transaction = icsTransactionPop(stack, proto);
+                    if(transaction != NULL) {
+                        if(icsEvaluate(curr->di, transaction)) 
+                            syslog(curr->priority, "%s %s '%s' '%s'", describeFlow(0x06, ntohl(ts->addr.saddr), ts->addr.source, ntohl(ts->addr.daddr), ts->addr.dest, flow, sizeof(flow)), curr->proto, curr->cve, curr->description);
+                        icsTransactionFree(transaction);
                     }
-                    icsTransactionFree(transaction);
+                    curr = curr->next;
                 }
-                curr = curr->next;
+                proto = icsWalkProtocols(stack, proto);
             }
         }
     }
@@ -403,7 +403,7 @@ static int loadScenarios(IcsScenario **scenarioRoot, char *scenarioDir)
                     t->proto       = icsStrdup(proto);
                     t->cve         = icsStrdup(cve);
                     t->description = icsStrdup(description);
-                    t->di          = icsMunge(proto, predicate);
+                    t->di          = icsMunge(protocol, predicate);
 
                     syslog(LOG_DEBUG, "accepted scenario %s(%d) %s(%d) %s %s %s", proto, protocol, prior, priority, t->cve, t->description, predicate);
 
