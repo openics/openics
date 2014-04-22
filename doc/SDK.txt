@@ -130,9 +130,9 @@ To write a program capable of using openics, do the following:
         If the predicate matches the transaction data, the function returns
         1 (true).
 
-	9)  Free up resources associated with libics by calling:
+    9)  Free up resources associated with libics by calling:
 
-		icsUninitialize();
+        icsUninitialize();
 
 
 DATA TYPES
