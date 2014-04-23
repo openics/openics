@@ -116,7 +116,7 @@ To write a program capable of using openics, do the following:
 
     8b) Or, you can perform predicate detection:
 
-        icsSINT *predicate = "modbus.header.function = diagnostic && "
+        icsSINT *predicate = "modbus.header.function == diagnostic && "
                              "modbus.request.subcode == force_listen_mode && "
                              "modbus.response.status == status_ok";
 
@@ -382,9 +382,6 @@ Memory Allocation and Destruction:
     If icsInitialize is called with NULL for the freeFunction, icsFree
     uses free.
 
-    IcsStack       *icsStackAllocate(void);
-    void            icsStackFree(IcsStack *);
-
 SDK Initialization and Teardown:
 
     iecBOOL         icsInitialize(void *(*mallocFunction)(size_t size),
@@ -617,11 +614,63 @@ Configuration Management Functions:
 
 Primary Functions:
 
-    IcsParseResult  icsParse(IcsLayer startLayer, IcsProtocol protocol, IcsMode mode, iecBYTE *data, iecUDINT octets, IcsStack *stack);
-    IcsProtocol     icsProbe(IcsLayer startLayer, IcsProtocol protocol, iecBYTE *data, iecUDINT octets);
-    IcsDetectItem  *icsMunge(const iecSINT *keyword, const iecSINT *options);
-    void            icsFreeDetectItem(IcsDetectItem *item);
-    iecBOOL         icsEvaluate(IcsDetectItem *item, IcsTransaction *transaction);
+    IcsProtocol     icsProbe(IcsLayer startLayer, 
+                             IcsProtocol protocol, 
+                             iecBYTE *data, 
+                             iecUDINT octets);
+
+    Treating data of length octets as protocol layer specified in startLayer,
+    attempt to determine the protocol. If an IcsProtocol other than 
+    ICS_PROTO_DETECT is passed, the function attempts to validate that 
+    protocol. 
+
+    If the function is able to either detect of validate the protocol, it
+    returns the protocol identifier from IcsProtocol enumeration; else the
+    function returns ICS_PROTO_NONE.
+
+    IcsParseResult  icsParse(IcsLayer startLayer, 
+                             IcsProtocol protocol, 
+                             IcsMode mode, 
+                             iecBYTE *data, 
+                             iecUDINT octets, 
+                             IcsStack *stack);
+
+    Treating data of length octets as the protocol layer specified in 
+    startlayer, parse the data using mode, which is either ICS_MODE_RQ 
+    (request), ICS_MODE_RS (response), or ICS_MODE_UNK (unknown, as when
+    parsing UDP. 
+
+    On success the function returns ICS_RESULT_OK, else an indicator from the
+    IcsParseResult enumeration.
+
+    IcsDetectItem *icsMunge(IcsProtocol protocol, 
+                            const iecSINT *predicate);
+
+    Create a detect item from the protocl and predicate. On success, the 
+    function returns a pointer, else NULL.
+
+    The predicate string must contain valid predicate syntax. For more info
+    look for PREDICATE SYNTAX.
+
+    void icsFreeDetectItem(IcsDetectItem *item);
+
+    Free the memory associated with a previously created detect item.
+
+    iecBOOL icsEvaluate(IcsDetectItem *item, 
+                        IcsTransaction *transaction);
+
+    Apply the detect item to the transaction to determine whether the
+    predicate expression the detect item evaluates to true or not.
+
+    IcsStack *icsStackAllocate(IcsProtocol primaryProtocl);
+
+    Allocate a new stack for the protocol specified in primaryProtocol.
+    Returns NULL on error.
+
+    void icsStackFree(IcsStack *stack);
+
+    Free the stack previously allocated with icsStackAllocate.
+
 
 String and Formatting Functions:
 
@@ -811,3 +860,114 @@ Module Functions:
 
     Prepare an IcsDetectItem based on the keyword and the options. Return NULL
     on failure.
+
+PREDICATE SYNTAX
+
+    Predicates are string expressions that evaluate to true or false. The
+    syntax of predicates is very similar to expressions in the the C 
+    programming language.
+
+    Each predicate string expression consists of one or more comma-seperated
+    terms, which are evaluated from left to right:
+
+        predicate:  term(,term)* 
+
+    Each term is a c-style expression. Since predicates are evaluated from
+    left to right, the outcome of the right-most term provides the final
+    result to icsEvaluate() function. Preceeding terms are typically used
+    to initialize local variables.
+
+    Consider the following example:
+
+        "lo = 1, hi = 5, test = 3, test >= lo && test <= hi"
+
+    The first three terms are used to initialize variables, and the last
+    term is used to verify that 'test' falls between 'lo' and 'hi'.
+
+    The predicate syntax supports the following operators, in order of
+    precedence:
+
+        -   unary minus
+        !   logical negation
+        ~   inverse bits
+        [ ] array initialization
+        ( ) precedence
+        =   assignment
+        +=  addition assignment
+        .=  concatenation assignment
+        -=  subtraction assignment
+        *=  multiplication assignment
+        /=  division assignment
+        *   multiplication
+        /   division
+        &   binary and
+        |   binary or
+        ^   binary xor
+        <<  binary shift left
+        >>  binary shift right
+        .   concatenation
+        +   addition
+        -   subtraction
+        <   logical less than
+        >   logical greater than
+        <=  logical less than or equal
+        >=  logical greater than or equal
+        ==  logical equal
+        !=  logical not-equal
+        in  array membership, i.e. ‘1 in [1, 2]’
+        &&  logical and
+        ||  logical or
+        ,   expression seperation  
+
+    Expressions can become arbitrarily complex by grouping logical
+    expressions with parentheses.
+
+    Typical use case:
+
+    In the modbus protocol, the function with the number '8' is
+    used for diagnostics. The diagnostic subcode '4' is used to 
+    place a controller in listen mode. If this is done successfully,
+    the controller will become unavailable, hence we have a denial
+    of service of sorts (DOS). To detect this condition, we need
+    to inspect for 3 conditions to be true:
+
+        1) modbus.header.function equals 8
+        2) modbus.request.subcode equals 4
+        3) modbus.response.status equals 0
+
+    As it turns out, openics defines constants for the numeric 
+    constants used in these conditions:
+
+        diagnostic = 8
+        force_listen_mode = 4
+        status_ok = 0
+
+    Substituting the constant names, we get:
+
+        1) modbus.header.function equals diagnostic
+        2) modbus.request.subcode equals force_listen_mode
+        3) modbus.response.status equals status_ok
+
+    The compound expression looks like this:
+
+        modbus.header.function == diagnostic &&
+        modbus.request.subcode == force_listen_mode &&
+        modbus.response.status == status_ok
+
+    Just as an illustration, we can show how to split this 
+    expression into multiple terms:
+
+        isDiag   = (modbus.header.function == diagnostic),
+        isRdOnly = (modbus.request.subcode == force_listen_mode),
+        isOk     = (modbus.response.status == status_ok),
+        isDiag && isRdOnly && isOk
+
+    The first three terms initialize the values, and the final term
+    determines whether they are all true. While this seems cumbersome,
+    it is only an example. In some situations, it can be convenient 
+    to build up individual variables for evaluation in the final term.
+
+    Please refer to the data dictionaries under doc/dd-* for 
+    information on which data items and which constants are currently
+    available for writing predicates. 
+
