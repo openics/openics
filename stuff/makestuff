@@ -1,0 +1,2 @@
+#!/bin/bash
+gcc -std=gnu99 -o `basename $1 .c` $1
