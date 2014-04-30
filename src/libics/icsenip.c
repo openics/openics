@@ -650,6 +650,8 @@ iecDINT icsInitializeEnip(char *(*configLoader)(char *name))
     ICS_FETCH_CONFIG_STRING(configLoader, "libics.ENIP.avoidfuncs");
     ICS_FETCH_CONFIG_STRING(configLoader, "libics.ENIP.servertcpports");
     ICS_FETCH_CONFIG_STRING(configLoader, "libics.ENIP.serverudpports");
+    ICS_FETCH_CONFIG_STRING(configLoader, "libics.ENIP.knownservers");
+    ICS_FETCH_CONFIG_STRING(configLoader, "libics.ENIP.knownclients");
 
     iecUINT transMax;
     if((transMax = icsConfigGetNumber("libics.ENIP.transactionmax")) != ICS_DEFAULT_MAXTRANS)
@@ -672,6 +674,16 @@ iecDINT icsInitializeEnip(char *(*configLoader)(char *name))
         if(list != NULL)
             avoidFuncs = icsNumberArrayFromCommaList(list, 0, &avoidFuncCount);
     }
+
+    iecINT   knownServerCount = 0;
+    iecSINT *knownServers = icsConfigGetString("libics.ENIP.knownservers");
+    if(knownServers != NULL)
+        icsHashSetItem(globals, "eip.config.knownservers", icsNumberArrayFromHostList(knownServers, &knownServerCount));
+
+    iecINT   knownClientCount = 0;
+    iecSINT *knownClients = icsConfigGetString("libics.ENIP.knownclients");
+    if(knownClients != NULL)
+        icsHashSetItem(globals, "eip.config.knownclients", icsNumberArrayFromHostList(knownClients, &knownClientCount));
 
     return globals == NULL ? 0 : 1;
 }

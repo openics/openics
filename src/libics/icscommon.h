@@ -29,9 +29,14 @@
 
 //#include "ics.h"
 
-#define stricmp strcasecmp
+#define stricmp                 strcasecmp
+#define ICS_MAXHOSTLISTSIZE     1024
+#define ICS_RX_HOSTNAME         "/^([0-9a-z][0-9a-z\\-\\.]*)$/i"
+#define ICS_RX_IP4ADDR          "/^(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})(\\/(\\d+))?$/"
+#define ICS_RX_COMMASEP         "/\\s*,\\s*/"
 
 iecUDINT *icsNumberArrayFromCommaList(iecSINT *list, iecUDINT def, iecUINT *pu);
+iecUDINT *icsNumberArrayFromHostList(iecSINT *list, iecUINT *pu);
 
 iecSINT  *icsBin2Hexdump(iecBYTE *data, iecUDINT octets);
 iecUSINT *icsHexdump2Bin(iecSINT *hexdump, iecUDINT *pl);

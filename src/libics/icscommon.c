@@ -44,12 +44,80 @@ iecUDINT *icsNumberArrayFromCommaList(iecSINT *list, iecUDINT def, iecUINT *pu)
         iecSINT *err;
         ICS_SMEMORY(nItems, iecUDINT, count);
         if(nItems != NULL) {
-            for(iecINT i=0; items[i] != NULL; i++)
+            for(iecINT i=0; i < count; i++)
                 nItems[i] = strtol(items[i], &err, 0);
             return nItems;
         }
+        icsFreeStringArray(items);
     }
     return NULL;
+}
+
+iecUDINT *icsNumberArrayFromHostList(iecSINT *list, iecUINT *pu)
+{
+    if(list == NULL)
+        return NULL;
+    ICS_SMEMORY(nItems, iecUDINT, ICS_MAXHOSTLISTSIZE);
+    iecSINT **items = icsRxSplit(list, ICS_RX_COMMASEP);
+    iecUINT count = 0;
+    if(items != NULL) {
+        for(iecINT i=0; items[i] != NULL; i++) {
+            iecSINT **parts = icsRxMatch(items[i], ICS_RX_IP4ADDR);
+            if(parts != NULL) {
+                struct in_addr inp;
+                inet_aton(parts[0], &inp);
+                iecUDINT ipaddr = ntohl(inp.s_addr);
+                iecINT bits = 32;
+                if(parts[3] != NULL) {
+                    iecINT bits = atoi(parts[3]);
+                    if(bits >= 0 && bits <= 32)
+                        bits = 32-bits;
+                }
+                icsFreeStringArray(parts);
+                ipaddr &= (0xFFFFFFFF << bits);
+                for(iecINT b=0; b <= bits; b++) {
+                    nItems[count] = ipaddr + b;
+                    if(++count == ICS_MAXHOSTLISTSIZE)
+                        break;
+                } 
+            }
+            else
+            if((parts = icsRxMatch(items[i], ICS_RX_HOSTNAME)) != NULL) {
+                struct addrinfo hints;
+                memset(&hints, 0, sizeof(hints));
+                hints.ai_family   = AF_INET;
+                hints.ai_flags    = AI_CANONNAME;
+                hints.ai_socktype = SOCK_STREAM;
+                struct addrinfo *info = NULL;
+                int r = getaddrinfo(parts[0], NULL, &hints, &info);
+                if(r == 0) {
+                    icsLog(ICS_LOGLEVEL_WARNING, 
+                           "Unresolved host %s, error code %u, %s\n",
+                           items[1], r, gai_strerror(r));
+                    continue;
+                }
+                struct addrinfo *ai = info;
+                while(ai != NULL) {
+                    struct sockaddr *sa = ai->ai_addr;
+                    if(sa->sa_family == AF_INET) {
+                        struct sockaddr_in *in = (struct sockaddr_in *) ai->ai_addr;
+                        uint32_t *ipp = (uint32_t *) &(in->sin_addr);
+                        nItems[count] = ntohl(*ipp);
+                        if(++count == ICS_MAXHOSTLISTSIZE)
+                            break;
+                    }
+                    ai = ai->ai_next;
+                }
+                freeaddrinfo(info);
+            }
+        }
+        icsFreeStringArray(items);
+    }
+    if(count == 0)
+        ICS_FREE(nItems);
+    if(pu)
+        *pu = count;
+    return nItems;
 }
 
 iecSINT *icsBin2Hexdump(iecBYTE *data, iecUDINT octets)

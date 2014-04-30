@@ -870,6 +870,8 @@ iecDINT icsInitializeCip(char *(*configLoader)(char *name))
     ICS_FETCH_CONFIG_STRING(configLoader, "libics.CIP.avoidfuncs");
     ICS_FETCH_CONFIG_STRING(configLoader, "libics.CIP.servertcpports");
     ICS_FETCH_CONFIG_STRING(configLoader, "libics.CIP.serverudpports");
+    ICS_FETCH_CONFIG_STRING(configLoader, "libics.CIP.knownservers");
+    ICS_FETCH_CONFIG_STRING(configLoader, "libics.CIP.knownclients");
 
     iecUINT transMax;
     if((transMax = icsConfigGetNumber("libics.CIP.transactionmax")) != ICS_DEFAULT_MAXTRANS)
@@ -900,6 +902,16 @@ iecDINT icsInitializeCip(char *(*configLoader)(char *name))
         if(list != NULL)
             avoidFuncs = icsNumberArrayFromCommaList(list, 0, &avoidFuncCount);
     }
+
+    iecINT   knownServerCount = 0;
+    iecSINT *knownServers = icsConfigGetString("libics.CIP.knownservers");
+    if(knownServers != NULL)
+        icsHashSetItem(globals, "cip.config.knownservers", icsNumberArrayFromHostList(knownServers, &knownServerCount));
+
+    iecINT   knownClientCount = 0;
+    iecSINT *knownClients = icsConfigGetString("libics.CIP.knownclients");
+    if(knownClients != NULL)
+        icsHashSetItem(globals, "cip.config.knownclients", icsNumberArrayFromHostList(knownClients, &knownClientCount));
 
     return globals == NULL ? 0 : 1;
 }

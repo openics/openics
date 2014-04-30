@@ -207,6 +207,8 @@ iecDINT icsInitializeDnp3(char *(*configLoader)(char *name))
     ICS_FETCH_CONFIG_STRING(configLoader, "libics.DNP3.avoidfuncs");
     ICS_FETCH_CONFIG_STRING(configLoader, "libics.DNP3.servertcpports");
     ICS_FETCH_CONFIG_STRING(configLoader, "libics.DNP3.serverudpports");
+    ICS_FETCH_CONFIG_STRING(configLoader, "libics.DNP3.knownservers");
+    ICS_FETCH_CONFIG_STRING(configLoader, "libics.DNP3.knownclients");
 
     iecUINT transMax;
     if((transMax = icsConfigGetNumber("libics.DNP3.transactionmax")) != ICS_DEFAULT_MAXTRANS)
@@ -227,6 +229,16 @@ iecDINT icsInitializeDnp3(char *(*configLoader)(char *name))
         if(list != NULL)
             avoidFuncs = icsNumberArrayFromCommaList(list, 0, &avoidFuncCount);
     }
+
+    iecINT   knownServerCount = 0;
+    iecSINT *knownServers = icsConfigGetString("libics.DNP3.knownservers");
+    if(knownServers != NULL)
+        icsHashSetItem(globals, "dnp3.config.knownservers", icsNumberArrayFromHostList(knownServers, &knownServerCount));
+
+    iecINT   knownClientCount = 0;
+    iecSINT *knownClients = icsConfigGetString("libics.DNP3.knownclients");
+    if(knownClients != NULL)
+        icsHashSetItem(globals, "dnp3.config.knownclients", icsNumberArrayFromHostList(knownClients, &knownClientCount));
 
     return globals == NULL ? 0 : 1;
 }

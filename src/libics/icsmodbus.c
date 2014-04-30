@@ -310,6 +310,8 @@ iecDINT icsInitializeModbus(char *(*configLoader)(char *name))
     ICS_FETCH_CONFIG_STRING(configLoader, "libics.MODBUS.avoidfuncs");
     ICS_FETCH_CONFIG_STRING(configLoader, "libics.MODBUS.servertcpports");
     ICS_FETCH_CONFIG_STRING(configLoader, "libics.MODBUS.serverudpports");
+    ICS_FETCH_CONFIG_STRING(configLoader, "libics.MODBUS.knownservers");
+    ICS_FETCH_CONFIG_STRING(configLoader, "libics.MODBUS.knownclients");
 
     iecUINT transMax;
     if((transMax = icsConfigGetNumber("libics.MODBUS.transactionmax")) != ICS_DEFAULT_MAXTRANS)
@@ -338,6 +340,16 @@ iecDINT icsInitializeModbus(char *(*configLoader)(char *name))
         if(list != NULL)
             avoidFuncs = icsNumberArrayFromCommaList(list, 0, &avoidFuncCount);
     }
+
+    iecINT   knownServerCount = 0;
+    iecSINT *knownServers = icsConfigGetString("libics.MODBUS.knownservers");
+    if(knownServers != NULL)
+        icsHashSetItem(globals, "modbus.config.knownservers", icsNumberArrayFromHostList(knownServers, &knownServerCount));
+
+    iecINT   knownClientCount = 0;
+    iecSINT *knownClients = icsConfigGetString("libics.MODBUS.knownclients");
+    if(knownClients != NULL)
+        icsHashSetItem(globals, "modbus.config.knownclients", icsNumberArrayFromHostList(knownClients, &knownClientCount));
 
     return globals == NULL ? 0 : 1;
 }
